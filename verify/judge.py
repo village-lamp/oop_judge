@@ -11,7 +11,8 @@ from util.java_util import compile_java
 
 
 def init():
-    jpype.startJVM(jpype.getDefaultJVMPath())
+    if not jpype.isJVMStarted():
+        jpype.startJVM(jpype.getDefaultJVMPath())
 
 
 class Judge:
@@ -40,21 +41,27 @@ class Judge:
             for file in file_list:
                 zf.extract(file, path=self.base_path)
 
+    def clear(self):
+        shutil.rmtree(self.target_path)
+        os.mkdir(self.target_path)
+        shutil.rmtree(self.base_path)
+        os.mkdir(self.base_path)
+
     def judge(self, inputs: list, null_times):
         self.unzip()
 
+        ret = []
         out = compile_java(self.base_path, self.target_path)
         main_path = self.diverse_file(self.target_path)
         if main_path == "":
-            print("未找到Main.java\n")
-            return
+            out = "未找到Main.java"
         start_class = jpype.JClass("Start")
         start = start_class()
         if out is not None:
-            print("编译错误：\n" + out)
-            return
+            self.clear()
+            return ["编译错误", out]
         else:
-            print("编译成功：\n")
+            ret.append("编译成功")
 
         for i in range(0, len(inputs)):
             input_path = os.path.join(self.test_path, "input{0}.txt".format(i + 1))
@@ -65,15 +72,16 @@ class Judge:
                 start.main([os.path.join(main_path, "input.txt"),
                             os.path.join(main_path, "output.txt")])
             except Exception as e:
-                print("Runtime Error:\n" + str(e))
-                return
+                ret.append(["运行错误", e])
+                continue
             out = read(os.path.join(main_path, "output.txt"))
-            print(self.verify(out, inputs[i].to_string(True)))
+            ver = self.verify(out, inputs[i].to_string(True))
+            if ver[0] == "答案错误":
+                ver.append(read(input_path))
+            ret.append(ver)
 
-        shutil.rmtree(self.target_path)
-        os.mkdir(self.target_path)
-        shutil.rmtree(self.base_path)
-        os.mkdir(self.base_path)
+        self.clear()
+        return ret
 
     def verify(self, out, stdout):
         out.replace("^", "**")
@@ -83,8 +91,8 @@ class Judge:
             v_out = sympy.expand(out)
         except:
             print("")
-            return "输出格式错误, 输出:" + out + " 参考输出:" + str(stdout) + "\n"
+            return ["答案错误", out, stdout.replace("**", "^")]
         if v_out == stdout:
-            return "答案正确\n"
+            return ["答案正确"]
         else:
-            return "答案错误, 输出:" + out + " 参考输出:" + str(stdout) + "\n"
+            return ["答案错误", out, stdout.replace("**", "^")]

@@ -25,15 +25,15 @@ def gen_null(strs: str, times):
             left = strs[pos]
             if right.isdigit():
                 if left.isdigit():
-                    break
+                    continue
                 if left != "(" and pos != 0 and left != " " and left != "\t":
                     l_left = strs[pos - 1]
                     if not l_left.isdigit() and l_left != "x":
-                        break
+                        continue
             else:
                 if right == "^":
                     break
-            strs = strs[:pos] + null + strs[pos:]
+            strs = strs[:pos + 1] + null + strs[pos + 1:]
     return strs
 
 
