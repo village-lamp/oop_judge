@@ -97,13 +97,14 @@ def gen_expr_factor(max_length):
     expr_factor = ExprFactor()
     length = 1
     isExprFactor = True
-    expr, lens = gen_expr(max_length - 2)
+    expr, lens = gen_expr(random.randint(3, max_length - 2))
     isExprFactor = False
     length += lens + 1
     expr_factor.expr = expr
     if max_length - length > 2:
         length += 1
-        number, lens = gen_number(random.randint(1, max_length - length))
+        number, lens = gen_number(1)
+        expr_factor.index = number
         length += lens
     return expr_factor, lens
 
@@ -111,8 +112,6 @@ def gen_expr_factor(max_length):
 def gen_number(max_length):
     number = Number()
     minn = 0
-    if max_length == 1:
-        minn = 1
     for i in range(0, max_length):
         number.number += str(random.randint(minn, 9))
     return number, max_length

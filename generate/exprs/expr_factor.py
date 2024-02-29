@@ -1,3 +1,6 @@
+import random
+
+
 class ExprFactor:
     def __init__(self):
         self.expr = None
@@ -8,5 +11,5 @@ class ExprFactor:
         sb += self.expr.to_string(isSympy)
         sb += ")"
         if self.index is not None:
-            sb += "^" + self.index.to_string(isSympy)
+            sb += "^" + random.choice(["+", ""]) + self.index.to_string(isSympy)
         return sb

@@ -8,15 +8,15 @@ class ResultErrorControl(ft.UserControl):
         self.tid = str(tid)
         self.inputs = ft.AlertDialog(
             title=ft.Text("input{}.txt".format(tid)),
-            content=ft.Text(inputs),
+            content=ft.Text(inputs, selectable=True),
         )
         self.stdout = ft.AlertDialog(
             title=ft.Text("stdout{}.txt".format(tid)),
-            content=ft.Text(stdout),
+            content=ft.Text(stdout, selectable=True),
         )
         self.out = ft.AlertDialog(
             title=ft.Text("out{}.txt".format(tid)),
-            content=ft.Text(out),
+            content=ft.Text(out, selectable=True),
         )
         self.page = page
 

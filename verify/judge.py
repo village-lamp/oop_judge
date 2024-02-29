@@ -42,10 +42,8 @@ class Judge:
                 zf.extract(file, path=self.base_path)
 
     def clear(self):
-        shutil.rmtree(self.target_path)
-        os.mkdir(self.target_path)
-        shutil.rmtree(self.base_path)
-        os.mkdir(self.base_path)
+        shutil.rmtree(self.path)
+        os.mkdir(self.path)
 
     def judge(self, inputs: list, null_times):
         self.unzip()
@@ -65,14 +63,15 @@ class Judge:
 
         for i in range(0, len(inputs)):
             input_path = os.path.join(self.test_path, "input{0}.txt".format(i + 1))
-            write(input_path, gen_null(inputs[i].to_string(), null_times))
+            # write(input_path, gen_null(inputs[i].to_string(), null_times))
+            write(input_path, inputs[i].to_string())
             os.system("copy {0} {1}".format(input_path,
                                             os.path.join(main_path, "input.txt")))
             try:
                 start.main([os.path.join(main_path, "input.txt"),
                             os.path.join(main_path, "output.txt")])
             except Exception as e:
-                ret.append(["运行错误", e])
+                ret.append(["运行错误", e, inputs[i].to_string()])
                 continue
             out = read(os.path.join(main_path, "output.txt"))
             ver = self.verify(out, inputs[i].to_string(True))
@@ -91,8 +90,8 @@ class Judge:
             v_out = sympy.expand(out)
         except:
             print("")
-            return ["答案错误", out, stdout.replace("**", "^")]
+            return ["答案错误", out, stdout]
         if v_out == stdout:
             return ["答案正确"]
         else:
-            return ["答案错误", out, stdout.replace("**", "^")]
+            return ["答案错误", out, stdout]

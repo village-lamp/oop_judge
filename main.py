@@ -41,15 +41,14 @@ def main(page: ft.Page):
                                            ans_list[i][2],
                                            ans_list[i][1], page))
                 if ans_list[i][0] == "运行错误":
-                    out_list.controls.append(RunTimeErrorControl(i, ans_list[i][1]))
+                    out_list.controls.append(RunTimeErrorControl(i, ans_list[i][1], ans_list[2], page))
         page.update()
 
-    dlg = ft.AlertDialog(
-            title=ft.Text("提交失败，请重试"),
-        )
+    dlg = ft.AlertDialog()
 
-    def open_dlg():
+    def open_dlg(strs):
         page.dialog = dlg
+        dlg.title = ft.Text(strs)
         dlg.open = True
         page.update()
 
@@ -57,7 +56,19 @@ def main(page: ft.Page):
         uf = []
         zip_name = ""
         out_list.clean()
-        zip_text.clean()
+        zip_text.value = ""
+        if not max_length.current.value.isdigit():
+            open_dlg("请输入数字作为长度上限")
+            return
+        else:
+            max_len = int(max_length.current.value)
+            if max_len > 500:
+                open_dlg("请不要超过500")
+                return
+            if max_len < 3:
+                open_dlg("请不要少于3")
+                return
+        page.update()
         upload_button.current.disabled = True
         user_name = get_sha256(page.client_user_agent)
         if file_picker.result is not None and file_picker.result.files is not None:
@@ -75,11 +86,11 @@ def main(page: ft.Page):
                 file_picker.upload(uf)
                 time.sleep(1)
                 if count >= 5:
-                    open_dlg()
+                    open_dlg("上传错误，请重试")
                     return
         os.system("mkdir resources\\" + user_name + "\\target")
         os.system("mkdir resources\\" + user_name + "\\test")
-        ans_list = start.start(user_name, zip_name, times.current.value)
+        ans_list = start.start(user_name, zip_name, times.current.value, max_len)
         view(ans_list)
 
     init()
@@ -91,6 +102,7 @@ def main(page: ft.Page):
     zip_text = ft.Text("", size=20)  # 选择文件显示
     out_list = ft.Column()
     upload_button = ft.Ref[ft.ElevatedButton]()
+    max_length = ft.Ref[ft.TextField]()
     times = ft.Ref[ft.Dropdown]()
 
     page.add(
@@ -105,7 +117,8 @@ def main(page: ft.Page):
                     ),
                     ft.Container(ft.Row([zip_text], scroll=ft.ScrollMode.ADAPTIVE),
                                  height=40, border_radius=5,
-                                 width=500, border=ft.border.all(1, ft.colors.BLACK)),
+                                 width=250, border=ft.border.all(1, ft.colors.BLACK)),
+                    ft.TextField(ref=max_length, label="长度上限", height=40, width=100, border_radius=5, value="50"),
                     ft.Dropdown(ref=times,
                                 height=40,
                                 width=80,

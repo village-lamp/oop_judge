@@ -4,8 +4,7 @@ import generate.generator
 from verify.judge import Judge
 
 
-def start(user_name, zip_name, times):
-    max_length = 50
+def start(user_name, zip_name, times, max_length):
     tests = []
     for i in range(0, int(times)):
         expr, _ = generate.generator.gen_expr(max_length)
