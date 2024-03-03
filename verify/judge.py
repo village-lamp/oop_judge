@@ -5,7 +5,6 @@ import zipfile
 import jpype
 import sympy
 
-from generate.generator import gen_null
 from util.file_util import write, read
 from util.java_util import compile_java
 
@@ -53,16 +52,17 @@ class Judge:
         main_path = self.diverse_file(self.target_path)
         if main_path == "":
             out = "未找到Main.java"
-        start_class = jpype.JClass("Start")
-        start = start_class()
         if out is not None:
             self.clear()
             return ["编译错误", out]
         else:
             ret.append("编译成功")
+        start_class = jpype.JClass("Start")
+        start = start_class()
 
         for i in range(0, len(inputs)):
             input_path = os.path.join(self.test_path, "input{0}.txt".format(i + 1))
+            output_path = os.path.join(self.test_path, "output{0}.txt".format(i + 1))
             # write(input_path, gen_null(inputs[i].to_string(), null_times))
             write(input_path, inputs[i].to_string())
             os.system("copy {0} {1}".format(input_path,
@@ -74,6 +74,8 @@ class Judge:
                 ret.append(["运行错误", e, inputs[i].to_string()])
                 continue
             out = read(os.path.join(main_path, "output.txt"))
+            os.system("copy {0} {1}".format(os.path.join(main_path, "output.txt"),
+                                            output_path))
             ver = self.verify(out, inputs[i].to_string(True))
             if ver[0] == "答案错误":
                 ver.append(read(input_path))

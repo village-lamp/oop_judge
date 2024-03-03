@@ -2,7 +2,6 @@ import os
 import hashlib
 import time
 
-import flet
 import flet as ft
 
 from flet_core import FilePickerUploadFile
@@ -41,7 +40,7 @@ def main(page: ft.Page):
                                            ans_list[i][2],
                                            ans_list[i][1], page))
                 if ans_list[i][0] == "运行错误":
-                    out_list.controls.append(RunTimeErrorControl(i, ans_list[i][1], ans_list[2], page))
+                    out_list.controls.append(RunTimeErrorControl(i, ans_list[i][1], ans_list[i][2], page))
         page.update()
 
     dlg = ft.AlertDialog()
@@ -128,7 +127,9 @@ def main(page: ft.Page):
                                 value="5",
                                 options=[ft.dropdown.Option("5"),
                                          ft.dropdown.Option("10"),
-                                         ft.dropdown.Option("20")]),
+                                         ft.dropdown.Option("20"),
+                                         ft.dropdown.Option("50"),
+                                         ft.dropdown.Option("100")]),
                     ft.ElevatedButton(
                         content=ft.Text("开始评测", weight=ft.FontWeight.W_600),
                         ref=upload_button,
@@ -146,4 +147,4 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    app = ft.app(target=main, view=flet.WEB_BROWSER, port=62340, upload_dir="resources")
+    app = ft.app(target=main, view=ft.WEB_BROWSER, port=62340, upload_dir="resources")
