@@ -2,17 +2,11 @@ import os
 import shutil
 import zipfile
 
-import jpype
 import sympy
 
 from generate.generator import gen_null
 from util.file_util import write, read
-from util.java_util import compile_java
-
-
-def init():
-    if not jpype.isJVMStarted():
-        jpype.startJVM(jpype.getDefaultJVMPath())
+from util.java_util import process_java
 
 
 class Judge:
@@ -21,7 +15,6 @@ class Judge:
         self.path = path
         self.base_path = os.path.join(path, "source_code")
         self.target_path = os.path.join(path, "target")
-        jpype.addClassPath("..\\" + self.target_path)
         self.test_path = os.path.join(path, "test")
         self.zip_path = os.path.join(self.base_path, zip_name)
 
@@ -51,7 +44,7 @@ class Judge:
         self.unzip()
 
         ret = []
-        out, main_path, main_name = compile_java(self.base_path, self.target_path)
+        out, main_path, main_name = process_java(self.base_path, self.target_path)
         if main_name == "":
             out = "未找到main"
         if out is not None:
@@ -60,28 +53,21 @@ class Judge:
         else:
             ret.append("编译成功")
 
-        try:
-            start_class = jpype.JClass("Start")
-            start = start_class()
-        except:
-            self.clear()
-            return ["编译错误", "未知错误"]
-
         for i in range(0, len(inputs)):
             input_path = os.path.join(self.test_path, "input{0}.txt".format(i + 1))
             output_path = os.path.join(self.test_path, "output{0}.txt".format(i + 1))
             write(input_path, gen_null(inputs[i].to_string(), null_times))
             # write(input_path, inputs[i].to_string())
             os.system("copy {0} {1}".format(input_path,
-                                            os.path.join(main_path, "input.txt")))
-            try:
-                start.main([os.path.join(main_path, "input.txt"),
-                            os.path.join(main_path, "output.txt")])
-            except Exception as e:
-                ret.append(["运行错误", e, inputs[i].to_string()])
+                                            os.path.join(self.target_path, "input.txt")))
+            os.system("java -jar {0} {1} {2}".format(os.path.join(self.target_path, "project.jar"),
+                                                     os.path.join(self.target_path, "input.txt"),
+                                                     os.path.join(self.target_path, "output.txt")))
+            out = read(os.path.join(self.target_path, "output.txt"))
+            if out.find("Exception") != -1:
+                ret.append(["运行错误", out, inputs[i].to_string()])
                 continue
-            out = read(os.path.join(main_path, "output.txt"))
-            os.system("copy {0} {1}".format(os.path.join(main_path, "output.txt"),
+            os.system("copy {0} {1}".format(os.path.join(self.target_path, "output.txt"),
                                             output_path))
             ver = self.verify(out, inputs[i].to_string(True))
             if ver[0] == "答案错误":

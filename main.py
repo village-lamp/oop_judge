@@ -10,7 +10,6 @@ from controls.result_accept_control import ResultAcceptControl
 from controls.result_compile_err_control import ResultCompileErrControl
 from controls.result_error_control import ResultErrorControl
 from controls.run_time_error_control import RunTimeErrorControl
-from verify.judge import init
 import start
 
 
@@ -92,7 +91,6 @@ def main(page: ft.Page):
         ans_list = start.start(user_name, zip_name, times.current.value, max_len)
         view(ans_list)
 
-    init()
     page.title = "oo评测工具"
     page.scroll = ft.ScrollMode.ADAPTIVE
     file_picker = ft.FilePicker(on_result=file_picker_result)
