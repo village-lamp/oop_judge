@@ -41,24 +41,30 @@ class Judge:
                 zf.extract(file, path=self.base_path)
 
     def clear(self):
-        shutil.rmtree(self.path)
-        os.mkdir(self.path)
+        shutil.rmtree(self.base_path)
+        os.mkdir(self.base_path)
+        shutil.rmtree(self.target_path)
+        os.mkdir(self.target_path)
 
     def judge(self, inputs: list, null_times):
         self.unzip()
 
         ret = []
-        out = compile_java(self.base_path, self.target_path)
-        main_path = self.diverse_file(self.target_path)
-        if main_path == "":
-            out = "未找到Main.java"
+        out, main_path, main_name = compile_java(self.base_path, self.target_path)
+        if main_name == "":
+            out = "未找到main"
         if out is not None:
             self.clear()
             return ["编译错误", out]
         else:
             ret.append("编译成功")
-        start_class = jpype.JClass("Start")
-        start = start_class()
+
+        try:
+            start_class = jpype.JClass("Start")
+            start = start_class()
+        except:
+            self.clear()
+            return ["编译错误", "未知错误"]
 
         for i in range(0, len(inputs)):
             input_path = os.path.join(self.test_path, "input{0}.txt".format(i + 1))

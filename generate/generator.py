@@ -112,6 +112,8 @@ def gen_expr_factor(max_length):
 def gen_number(max_length):
     number = Number()
     minn = 0
-    for i in range(0, max_length):
-        number.number += str(random.randint(minn, 9))
-    return number, max_length
+    maxx = 9 if max_length != 1 else 8
+    lens = random.randint(1, max(max_length, 20))
+    for i in range(0, lens):
+        number.number += str(random.randint(minn, maxx))
+    return number, lens
