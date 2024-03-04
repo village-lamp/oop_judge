@@ -5,6 +5,7 @@ import zipfile
 import jpype
 import sympy
 
+from generate.generator import gen_null
 from util.file_util import write, read
 from util.java_util import compile_java
 
@@ -69,8 +70,8 @@ class Judge:
         for i in range(0, len(inputs)):
             input_path = os.path.join(self.test_path, "input{0}.txt".format(i + 1))
             output_path = os.path.join(self.test_path, "output{0}.txt".format(i + 1))
-            # write(input_path, gen_null(inputs[i].to_string(), null_times))
-            write(input_path, inputs[i].to_string())
+            write(input_path, gen_null(inputs[i].to_string(), null_times))
+            # write(input_path, inputs[i].to_string())
             os.system("copy {0} {1}".format(input_path,
                                             os.path.join(main_path, "input.txt")))
             try:

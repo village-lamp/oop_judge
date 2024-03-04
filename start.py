@@ -10,4 +10,4 @@ def start(user_name, zip_name, times, max_length):
         expr, _ = generate.generator.gen_expr(max_length)
         tests.append(expr)
     judge = Judge(os.path.join("resources", user_name), zip_name)
-    return judge.judge(tests, int(max_length / 10))
+    return judge.judge(tests, int(max_length / 5))

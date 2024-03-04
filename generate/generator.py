@@ -34,6 +34,7 @@ def gen_null(strs: str, times):
                 if right == "^":
                     break
             strs = strs[:pos + 1] + null + strs[pos + 1:]
+            break
     return strs
 
 
@@ -113,7 +114,7 @@ def gen_number(max_length):
     number = Number()
     minn = 0
     maxx = 9 if max_length != 1 else 8
-    lens = random.randint(1, max(max_length, 20))
+    lens = random.randint(1, min(max_length, 20))
     for i in range(0, lens):
         number.number += str(random.randint(minn, maxx))
     return number, lens
