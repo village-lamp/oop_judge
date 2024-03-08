@@ -61,7 +61,7 @@ class Judge:
             write_inputs = []
             for strs in inputs[i]:
                 if type(strs) is Expr:
-                    write_inputs.append(strs.to_string())
+                    write_inputs.append(strs.str)
                 else:
                     write_inputs.append(str(strs))
             write(input_path, write_inputs)
@@ -77,12 +77,12 @@ class Judge:
                 inputs_str = ""
                 for j in range(0, len(inputs[i]) - 1):
                     inputs_str = str(inputs[i][j]) + '\n'
-                inputs_str += inputs[i][len(inputs[i]) - 1].to_string()
+                inputs_str += inputs[i][len(inputs[i]) - 1].str
                 ret.append(["运行错误", out, inputs_str])
                 continue
             os.system("copy {0} {1}".format(os.path.join(self.target_path, "output.txt"),
                                             output_path))
-            ver = self.verify(out, inputs[i][len(inputs[i]) - 1].to_string(True))
+            ver = self.verify(out, inputs[i][len(inputs[i]) - 1].sympy_str)
             if ver[0] == "答案错误":
                 ver.append(read(input_path))
             ret.append(ver)

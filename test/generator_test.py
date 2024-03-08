@@ -20,10 +20,11 @@ from generate.generator import (gen_null, gen_expr, gen_func, gen_test, gen_var_
 # expr = gen_expr(50, 5000)
 # print(expr.str, expr.sympy_str, expr.len, expr.get_cost())
 
-out = gen_test(50, 20, 5000, 2000)
-print(out[0])
-for i in range(1, int(out[0]) + 1):
-    print(out[i])
-test_expr = out[int(out[0]) + 1]
-print(test_expr.str, test_expr.sympy_str, test_expr.len, test_expr.get_cost())
+for i in range(0, 50):
+    out = gen_test(50, 20, 5000, 2000)
+    print(out[0])
+    for i in range(1, int(out[0]) + 1):
+        print(out[i])
+    test_expr = out[int(out[0]) + 1]
+    print(test_expr.str, test_expr.sympy_str, test_expr.len, test_expr.get_cost())
 i = 0

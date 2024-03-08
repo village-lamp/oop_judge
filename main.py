@@ -55,17 +55,14 @@ def main(page: ft.Page):
         zip_name = ""
         out_list.clean()
         zip_text.value = ""
-        if not max_length.current.value.isdigit():
-            open_dlg("请输入数字作为长度上限")
-            return
+        types = test_type.current.value
+        if types == "中测(互测)":
+            types = 1
         else:
-            max_len = int(max_length.current.value)
-            if max_len > 500:
-                open_dlg("请不要超过500")
-                return
-            if max_len < 3:
-                open_dlg("请不要少于3")
-                return
+            if types == "强测":
+                types = 2
+            else:
+                types = 0
         page.update()
         upload_button.current.disabled = True
         user_name = get_sha256(page.client_user_agent)
@@ -88,7 +85,7 @@ def main(page: ft.Page):
                     return
         os.system("mkdir resources\\" + user_name + "\\target")
         os.system("mkdir resources\\" + user_name + "\\test")
-        ans_list = start.start(user_name, zip_name, times.current.value, max_len)
+        ans_list = start.start(user_name, zip_name, times.current.value, types)
         view(ans_list)
 
     page.title = "oo评测工具"
@@ -99,7 +96,7 @@ def main(page: ft.Page):
     zip_text = ft.Text("", size=20)  # 选择文件显示
     out_list = ft.Column()
     upload_button = ft.Ref[ft.ElevatedButton]()
-    max_length = ft.Ref[ft.TextField]()
+    test_type = ft.Ref[ft.Dropdown]()
     times = ft.Ref[ft.Dropdown]()
 
     page.add(
@@ -115,7 +112,16 @@ def main(page: ft.Page):
                     ft.Container(ft.Row([zip_text], scroll=ft.ScrollMode.ADAPTIVE),
                                  height=40, border_radius=5,
                                  width=250, border=ft.border.all(1, ft.colors.BLACK)),
-                    ft.TextField(ref=max_length, label="长度上限", height=40, width=100, border_radius=5, value="50"),
+                    ft.Dropdown(ref=test_type,
+                                height=40,
+                                width=200,
+                                content_padding=2,
+                                alignment=ft.alignment.center,
+                                label="测试方案",
+                                value="中测(互测)",
+                                options=[ft.dropdown.Option("弱测"),
+                                         ft.dropdown.Option("中测(互测)"),
+                                         ft.dropdown.Option("强测")]),
                     ft.Dropdown(ref=times,
                                 height=40,
                                 width=80,
@@ -126,8 +132,7 @@ def main(page: ft.Page):
                                 options=[ft.dropdown.Option("5"),
                                          ft.dropdown.Option("10"),
                                          ft.dropdown.Option("20"),
-                                         ft.dropdown.Option("50"),
-                                         ft.dropdown.Option("100")]),
+                                         ft.dropdown.Option("50")]),
                     ft.ElevatedButton(
                         content=ft.Text("开始评测", weight=ft.FontWeight.W_600),
                         ref=upload_button,

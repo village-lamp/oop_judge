@@ -32,6 +32,7 @@ def gen_test(max_length, func_max_length, max_cost, func_max_cost):
         res.append(function.to_string())
         _, cost = function.calc([VarFactor(), VarFactor(), VarFactor()])
         max_func_cost = max(max_func_cost, cost)
+    max_func_cost *= 2
     expr = gen_expr(max_length, max_cost)
     res.append(expr)
     return res
@@ -86,7 +87,7 @@ def gen_null(strs: str, times):
 def gen_expr(max_length, max_cost):
     expr = Expr()
     length = 0
-    while max_length - length > 2 and expr.get_cost() < max_cost:
+    while max_length - length > 2 and expr.get_cost() + 2 < max_cost:
         length += 1
         term = gen_term(max_length - length, max_cost - expr.get_cost())
         length += term.len
