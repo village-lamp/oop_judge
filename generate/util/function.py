@@ -12,9 +12,9 @@ class Function:
     def calc(self, var_list):
         res = "("
         new_var_list = []
-        for i in range(0, len(var_list)):
+        for i in range(0, len(self.var_order)):
             new_var_list.append('(' + var_list[i].sympy_str + ')')
-            VarFactor.default.update({self.var_order[i]: var_list[i].get_cost()})
+            VarFactor.default.update({self.var_order[i]: var_list[i].get_cost() + 1})
         cost = self.body.get_cost()
         VarFactor.default.update({"x": 1, "y": 1, "z": 1})
         last = None

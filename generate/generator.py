@@ -13,12 +13,14 @@ from generate.util.function import Function
 
 functions = []
 var_lists = []
+max_func_cost = 0
 is_func = 0
 
 
 def gen_test(max_length, func_max_length, max_cost, func_max_cost):
-    global functions
+    global functions, max_func_cost
     res = []
+    max_func_cost = 0
     functions = []
     func_name = ['f', 'g', 'h']
     random.shuffle(func_name)
@@ -28,6 +30,8 @@ def gen_test(max_length, func_max_length, max_cost, func_max_cost):
         function = gen_func(func_name[i], func_max_length, func_max_cost)
         functions.append(function)
         res.append(function.to_string())
+        _, cost = function.calc([VarFactor(), VarFactor(), VarFactor()])
+        max_func_cost = max(max_func_cost, cost)
     expr = gen_expr(max_length, max_cost)
     res.append(expr)
     return res
@@ -97,7 +101,7 @@ def gen_term(max_length, max_cost):
     term.is_negative = random.choice([False, True])
     while max_length - length > 1 and term.get_cost() < max_cost:
         length += 1
-        factor = gen_factor(max_length - length, max_cost - term.get_cost())
+        factor = gen_factor(max_length - length, int(max_cost / term.get_cost()))
         length += factor.len
         term.factors.append(factor)
         if random.randint(0, 1) > 0:
@@ -108,13 +112,14 @@ def gen_term(max_length, max_cost):
 
 def gen_factor(max_length, max_cost):
     gens = [gen_var_factor]
-    if max_length > 2:
+    if max_length > 2 and max_cost > 1:
         gens.append(gen_con_factor)
-    if max_length > 4:
+    if max_length > 4 and max_cost > 10:
         gens.append(gen_expr_factor)
-    if max_length > 5:
+    if max_length > 5 and max_cost > 10:
         gens.append(gen_exp_factor)
-    if max_length > 7 and is_func == 0 and len(functions) > 0:
+    if (max_length > 7 and is_func == 0 and
+            len(functions) > 0 and max_cost > max_func_cost):
         gens.append(gen_func_factor)
     factor = random.choice(gens)(max_length, max_cost)
     return factor
@@ -128,8 +133,7 @@ def gen_exp_factor(max_length, max_cost):
     exp_factor.factor = factor
     if max_length - length > 2 and exp_factor.get_cost() < max_cost:
         length += 1
-        number = gen_number(1,
-                            int(math.log(max_cost) / math.log(exp_factor.get_cost())))
+        number = gen_index(int(math.log2(max_cost - exp_factor.get_cost())))
         exp_factor.index = number
         length += number.len
     exp_factor.to_string()
@@ -142,9 +146,14 @@ def gen_func_factor(max_length, max_cost):
     func_factor.function = random.choice(functions)
     var_num = func_factor.function.var_num
     for i in range(0, var_num):
-        factor = gen_factor(random.randint(1, max_length - length - var_num + i + 1),
-                            min(500, max_cost / var_num))
-        func_factor.var_list.append(factor)
+        cost = max_cost * 2
+        var_max_cost = 500
+        while cost > max_cost:
+            factor = gen_factor(random.randint(1, max_length - length - var_num + i + 1), var_max_cost)
+            func_factor.var_list[i] = factor
+            func_factor.to_string()
+            cost = func_factor.get_cost()
+            var_max_cost >>= 1
         length += factor.len
     func_factor.to_string()
     return func_factor
@@ -157,7 +166,7 @@ def gen_var_factor(max_length, max_cost):
     length = 1
     if max_length - length > 2 and var_factor.get_cost() < max_cost:
         length += 1
-        number = gen_number(1,1)
+        number = gen_index(8)
         var_factor.index = number
         length += number.len
     var_factor.to_string()
@@ -184,8 +193,7 @@ def gen_expr_factor(max_length, max_cost):
     expr_factor.expr = expr
     if max_length - length > 2 and expr_factor.get_cost() < max_cost:
         length += 1
-        number = gen_number(1,
-                            int(math.log(max_cost) / math.log(expr_factor.get_cost())))
+        number = gen_index(int(math.log(max_cost) / math.log(expr_factor.get_cost())))
         expr_factor.index = number
         length += number.len
     expr_factor.to_string()
@@ -194,10 +202,17 @@ def gen_expr_factor(max_length, max_cost):
 
 def gen_number(max_length, max_cost):
     number = Number()
-    minn = 0
-    maxx = 9 if max_length != 1 else 8
     lens = random.randint(1, min(max_length, min(max_cost, 10)))
     for i in range(0, lens):
-        number.number += str(random.randint(minn, maxx))
+        number.number += str(random.randint(0, 9))
+    number.to_string()
+    return number
+
+
+def gen_index(max_cost):
+    number = Number()
+    minn = 0
+    maxx = min(8, max_cost)
+    number.number += str(random.randint(minn, maxx))
     number.to_string()
     return number

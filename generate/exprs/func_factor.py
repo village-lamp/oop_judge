@@ -1,6 +1,9 @@
+from generate.exprs.var_factor import VarFactor
+
+
 class FuncFactor:
     def __init__(self):
-        self.var_list = []
+        self.var_list = [VarFactor(), VarFactor(), VarFactor()]
         self.function = None
         self.sympy_str = ""
         self.str = ""
