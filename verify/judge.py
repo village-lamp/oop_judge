@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import zipfile
 
@@ -94,12 +95,66 @@ class Judge:
         out = out.replace("^", "**")
         stdout = stdout.replace("^", "**")
         stdout = sympy.expand(stdout)
+        if not self.is_legal(out):
+            return ["答案错误", out, stdout]
         try:
             v_out = sympy.expand(out)
         except:
-            print("")
+            print("exception")
             return ["答案错误", out, stdout]
         if v_out == stdout:
             return ["答案正确"]
         else:
             return ["答案错误", out, stdout]
+
+    def is_legal(self, out: str):
+        pos = 0
+        left_pos = out.find("(", pos)
+        # 找到exp以及括号，比较位置是否相同，如果不同说明有不必要的括号
+        while left_pos != -1:
+            pos = out.find("exp", pos)
+            if pos + 3 != left_pos:
+                return False
+
+            # 找到右括号位置
+            right_pos = self.get_right_brace(out, left_pos)
+            pos = right_pos + 1
+
+            inner = out[left_pos + 1:right_pos]
+            if out[left_pos + 1] == "(" and out[right_pos - 1] == ")":
+                if self.is_legal(out[left_pos + 2:right_pos - 1]):
+                    left_pos = out.find("(", pos)
+                    continue
+                else:
+                    return False
+
+            if re.fullmatch("x(\\*\\*\\+?\\d+)?", inner) is not None:
+                left_pos = out.find("(", pos)
+                continue
+
+            if re.fullmatch("[+-]?\\d+", inner) is not None:
+                left_pos = out.find("(", pos)
+                continue
+
+            if inner[0:3] == "exp":
+                right_pos = self.get_right_brace(inner, 3)
+                rest = inner[right_pos + 1:]
+                if re.fullmatch("(\\*\\*\\+?\\d+)?", rest) is not None:
+                    left_pos = out.find("(", pos)
+                    continue
+
+            return False
+
+        return True
+
+
+    def get_right_brace(self, strs, left_pos):
+        bra = 1
+        right_pos = left_pos + 1
+        while bra > 0:
+            if strs[right_pos] == "(":
+                bra += 1
+            if strs[right_pos] == ")":
+                bra -= 1
+            right_pos += 1
+        return right_pos - 1
