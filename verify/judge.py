@@ -4,6 +4,7 @@ import zipfile
 
 import sympy
 
+from generate.exprs.expr import Expr
 from generate.generator import gen_null
 from util.file_util import write, read
 from util.java_util import process_java
@@ -56,20 +57,32 @@ class Judge:
         for i in range(0, len(inputs)):
             input_path = os.path.join(self.test_path, "input{0}.txt".format(i + 1))
             output_path = os.path.join(self.test_path, "output{0}.txt".format(i + 1))
-            write(input_path, gen_null(inputs[i].to_string(), null_times))
-            # write(input_path, inputs[i].to_string())
+            # write(input_path, gen_null(inputs[i], null_times))
+            write_inputs = []
+            for strs in inputs[i]:
+                if type(strs) is Expr:
+                    write_inputs.append(strs.to_string())
+                else:
+                    write_inputs.append(str(strs))
+            write(input_path, write_inputs)
+            print("write input\n")
             os.system("copy {0} {1}".format(input_path,
                                             os.path.join(self.target_path, "input.txt")))
             os.system("java -jar {0} {1} {2}".format(os.path.join(self.target_path, "project.jar"),
                                                      os.path.join(self.target_path, "input.txt"),
                                                      os.path.join(self.target_path, "output.txt")))
             out = read(os.path.join(self.target_path, "output.txt"))
+            print("run finished\n")
             if out.find("Exception") != -1:
-                ret.append(["运行错误", out, inputs[i].to_string()])
+                inputs_str = ""
+                for j in range(0, len(inputs[i]) - 1):
+                    inputs_str = str(inputs[i][j]) + '\n'
+                inputs_str += inputs[i][len(inputs[i]) - 1].to_string()
+                ret.append(["运行错误", out, inputs_str])
                 continue
             os.system("copy {0} {1}".format(os.path.join(self.target_path, "output.txt"),
                                             output_path))
-            ver = self.verify(out, inputs[i].to_string(True))
+            ver = self.verify(out, inputs[i][len(inputs[i]) - 1].to_string(True))
             if ver[0] == "答案错误":
                 ver.append(read(input_path))
             ret.append(ver)
@@ -78,8 +91,8 @@ class Judge:
         return ret
 
     def verify(self, out, stdout):
-        out.replace("^", "**")
-        stdout.replace("^", "**")
+        out = out.replace("^", "**")
+        stdout = stdout.replace("^", "**")
         stdout = sympy.expand(stdout)
         try:
             v_out = sympy.expand(out)

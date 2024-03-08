@@ -5,11 +5,23 @@ class ExprFactor:
     def __init__(self):
         self.expr = None
         self.index = None
+        self.sympy_str = ""
+        self.str = ""
+        self.len = 0
 
-    def to_string(self, isSympy=False):
-        sb = "("
-        sb += self.expr.to_string(isSympy)
-        sb += ")"
+    def get_cost(self):
+        cost = max(self.expr.get_cost(), 2)
         if self.index is not None:
-            sb += "^" + random.choice(["+", ""]) + self.index.to_string(isSympy)
-        return sb
+            cost = pow(cost, max(int(self.index.number), 1))
+        return cost
+
+    def to_string(self):
+        self.sympy_str = ""
+        self.str = ""
+        self.sympy_str = "(" + self.expr.sympy_str + ")"
+        self.str = "(" + self.expr.str + ")"
+        if self.index is not None:
+            c = random.choice(["+", ""])
+            self.sympy_str += "^" + c + self.index.sympy_str
+            self.str += "^" + c + self.index.str
+        self.len = len(self.str)

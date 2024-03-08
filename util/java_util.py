@@ -40,7 +40,7 @@ def compile_java(code_path, target_path):
 
 def copy_start():
     strs = read(start_path)
-    strs.replace("Main", main_name)
+    strs = strs.replace("Main", main_name.removesuffix(".java"))
     write(os.path.join(main_path, "Start.java"), strs)
     file_list.append(os.path.join(main_path, "Start.java"))
 

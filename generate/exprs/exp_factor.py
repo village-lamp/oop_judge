@@ -1,27 +1,25 @@
 import random
 
 
-class VarFactor:
-    default = {"x": 1, "y": 1, "z": 1}
-
+class ExpFactor:
     def __init__(self):
+        self.factor = None
         self.index = None
-        self.name = "x"
         self.sympy_str = ""
         self.str = ""
         self.len = 0
 
     def get_cost(self):
         if self.index is not None:
-            return pow(VarFactor.default[self.name], int(self.index.number))
+            return pow(2, int(self.index.number)) + self.factor.get_cost() + 1
         else:
-            return VarFactor.default[self.name]
+            return self.factor.get_cost() + 1
 
     def to_string(self):
         self.sympy_str = ""
         self.str = ""
-        self.sympy_str = self.name
-        self.str = self.name
+        self.sympy_str = "exp(" + self.factor.sympy_str + ")"
+        self.str = "exp(" + self.factor.str + ")"
         if self.index is not None:
             c = random.choice(["+", ""])
             self.sympy_str += "^" + c + self.index.sympy_str

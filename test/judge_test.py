@@ -1,4 +1,5 @@
 from verify.judge import Judge
+import sympy
 
-judge = Judge("resources\\admin", "1.zip")
-judge.unzip()
+# judge = Judge("", "")
+# print(judge.verify(out, stdout))

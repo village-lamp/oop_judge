@@ -1,13 +1,54 @@
+import math
 import random
 
 from generate.exprs.con_factor import ConFactor
+from generate.exprs.exp_factor import ExpFactor
 from generate.exprs.expr import Expr
 from generate.exprs.expr_factor import ExprFactor
+from generate.exprs.func_factor import FuncFactor
 from generate.exprs.number import Number
 from generate.exprs.term import Term
 from generate.exprs.var_factor import VarFactor
+from generate.util.function import Function
 
-isExprFactor = False
+functions = []
+var_lists = []
+is_func = 0
+
+
+def gen_test(max_length, func_max_length, max_cost, func_max_cost):
+    global functions
+    res = []
+    functions = []
+    func_name = ['f', 'g', 'h']
+    random.shuffle(func_name)
+    func_num = random.randint(0, 3)
+    res.append(func_num)
+    for i in range(0, func_num):
+        function = gen_func(func_name[i], func_max_length, func_max_cost)
+        functions.append(function)
+        res.append(function.to_string())
+    expr = gen_expr(max_length, max_cost)
+    res.append(expr)
+    return res
+
+
+def gen_func(func_name, max_length, max_cost):
+    global is_func, var_lists
+    function = Function()
+    function.name = func_name
+    function.var_num = random.randint(1, 3)
+    var_name = ['x', 'y', 'z']
+    random.shuffle(var_name)
+    function.var_order = var_name[0:function.var_num]
+    for i in range(0, function.var_num):
+        function.var_name.update({var_name[i]: i})
+    is_func = function.var_num
+    var_lists = function.var_order
+    function.body = gen_expr(max_length, max_cost)
+    var_lists = []
+    is_func = 0
+    return function
 
 
 def gen_null(strs: str, times):
@@ -38,83 +79,125 @@ def gen_null(strs: str, times):
     return strs
 
 
-def gen_expr(max_length):
+def gen_expr(max_length, max_cost):
     expr = Expr()
     length = 0
-    while max_length - length > 2:
+    while max_length - length > 2 and expr.get_cost() < max_cost:
         length += 1
-        term, lens = gen_term(random.randint(2, max_length - length))
-        length += lens
+        term = gen_term(max_length - length, max_cost - expr.get_cost())
+        length += term.len
         expr.add_term(term, random.choice([False, True]))
-    return expr, length
+    expr.to_string()
+    return expr
 
 
-def gen_term(max_length):
+def gen_term(max_length, max_cost):
     term = Term()
     length = 0
     term.is_negative = random.choice([False, True])
-    while max_length - length > 1:
+    while max_length - length > 1 and term.get_cost() < max_cost:
         length += 1
-        factor, lens = gen_factor(random.randint(min(max_length - length, 6),
-                                                 max_length - length))
-        length += lens
+        factor = gen_factor(max_length - length, max_cost - term.get_cost())
+        length += factor.len
         term.factors.append(factor)
-    return term, length
+        if random.randint(0, 1) > 0:
+            break
+    term.to_string()
+    return term
 
 
-def gen_factor(max_length):
-    gens = [gen_var_factor(random.randint(1, max_length))]
+def gen_factor(max_length, max_cost):
+    gens = [gen_var_factor]
     if max_length > 2:
-        gens.append(gen_con_factor(random.randint(2, max_length)))
-    if max_length > 5 and not isExprFactor:
-        gens.append(gen_expr_factor(random.randint(5, max_length)))
-    factor, lens = random.choice(gens)
-    return factor, lens
+        gens.append(gen_con_factor)
+    if max_length > 4:
+        gens.append(gen_expr_factor)
+    if max_length > 5:
+        gens.append(gen_exp_factor)
+    if max_length > 7 and is_func == 0 and len(functions) > 0:
+        gens.append(gen_func_factor)
+    factor = random.choice(gens)(max_length, max_cost)
+    return factor
 
 
-def gen_var_factor(max_length):
-    var_factor = VarFactor()
-    length = 1
-    if max_length - length > 2:
+def gen_exp_factor(max_length, max_cost):
+    exp_factor = ExpFactor()
+    length = 5
+    factor = gen_factor(max_length - length, max_cost - 1)
+    length += factor.len
+    exp_factor.factor = factor
+    if max_length - length > 2 and exp_factor.get_cost() < max_cost:
         length += 1
-        number, lens = gen_number(1)
+        number = gen_number(1,
+                            int(math.log(max_cost) / math.log(exp_factor.get_cost())))
+        exp_factor.index = number
+        length += number.len
+    exp_factor.to_string()
+    return exp_factor
+
+
+def gen_func_factor(max_length, max_cost):
+    func_factor = FuncFactor()
+    length = 3
+    func_factor.function = random.choice(functions)
+    var_num = func_factor.function.var_num
+    for i in range(0, var_num):
+        factor = gen_factor(random.randint(1, max_length - length - var_num + i + 1),
+                            min(500, max_cost / var_num))
+        func_factor.var_list.append(factor)
+        length += factor.len
+    func_factor.to_string()
+    return func_factor
+
+
+def gen_var_factor(max_length, max_cost):
+    var_factor = VarFactor()
+    if is_func > 0:
+        var_factor.name = random.choice(var_lists[0:is_func])
+    length = 1
+    if max_length - length > 2 and var_factor.get_cost() < max_cost:
+        length += 1
+        number = gen_number(1,1)
         var_factor.index = number
-        length += lens
-    return var_factor, length
+        length += number.len
+    var_factor.to_string()
+    return var_factor
 
 
-def gen_con_factor(max_length):
+def gen_con_factor(max_length, max_cost):
     con_factor = ConFactor()
     length = 1
     con_factor.is_negative = random.choice([False, True])
-    number, lens = gen_number(random.randint(1, max_length - length))
-    length += lens
+    number = gen_number(random.randint(1, max_length - length),
+                        max_cost - 1)
+    length += number.len
     con_factor.number = number
-    return con_factor, length
+    con_factor.to_string()
+    return con_factor
 
 
-def gen_expr_factor(max_length):
-    global isExprFactor
+def gen_expr_factor(max_length, max_cost):
     expr_factor = ExprFactor()
     length = 1
-    isExprFactor = True
-    expr, lens = gen_expr(random.randint(3, max_length - 2))
-    isExprFactor = False
-    length += lens + 1
+    expr = gen_expr(random.randint(3, max_length - 2), max_cost - 1)
+    length += expr.len + 1
     expr_factor.expr = expr
-    if max_length - length > 2:
+    if max_length - length > 2 and expr_factor.get_cost() < max_cost:
         length += 1
-        number, lens = gen_number(1)
+        number = gen_number(1,
+                            int(math.log(max_cost) / math.log(expr_factor.get_cost())))
         expr_factor.index = number
-        length += lens
-    return expr_factor, lens
+        length += number.len
+    expr_factor.to_string()
+    return expr_factor
 
 
-def gen_number(max_length):
+def gen_number(max_length, max_cost):
     number = Number()
     minn = 0
     maxx = 9 if max_length != 1 else 8
-    lens = random.randint(1, min(max_length, 20))
+    lens = random.randint(1, min(max_length, min(max_cost, 10)))
     for i in range(0, lens):
         number.number += str(random.randint(minn, maxx))
-    return number, lens
+    number.to_string()
+    return number
