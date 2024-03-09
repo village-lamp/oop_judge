@@ -12,6 +12,8 @@ from controls.result_error_control import ResultErrorControl
 from controls.run_time_error_control import RunTimeErrorControl
 import start
 
+test_types = {"弱测": 0, "中测(互测)": 1, "强测": 2, "特测": 3}
+
 
 def main(page: ft.Page):
     def get_sha256(data):
@@ -38,9 +40,11 @@ def main(page: ft.Page):
                         ResultErrorControl(i, ans_list[i][3],
                                            ans_list[i][2],
                                            ans_list[i][1],
-                                           page, ans_list[i][0]))
+                                           page, ans_list[i][0],
+                                           ans_list[i][4]))
                 if ans_list[i][0] == "运行错误":
-                    out_list.controls.append(RunTimeErrorControl(i, ans_list[i][1], ans_list[i][2], page))
+                    out_list.controls.append(RunTimeErrorControl(i, ans_list[i][1],
+                                                                 ans_list[i][2], page, ans_list[i][3]))
         page.update()
 
     dlg = ft.AlertDialog()
@@ -51,19 +55,20 @@ def main(page: ft.Page):
         dlg.open = True
         page.update()
 
+    def test_type_change(_):
+        value = test_type.current.value
+        if value == "特测":
+            times.current.disabled = True
+        else:
+            times.current.disabled = False
+        page.update()
+
     def upload_files(_):
         uf = []
         zip_name = ""
         out_list.clean()
         zip_text.value = ""
-        types = test_type.current.value
-        if types == "中测(互测)":
-            types = 1
-        else:
-            if types == "强测":
-                types = 2
-            else:
-                types = 0
+        types = test_types[test_type.current.value]
         page.update()
         upload_button.current.disabled = True
         user_name = get_sha256(page.client_user_agent)
@@ -122,7 +127,9 @@ def main(page: ft.Page):
                                 value="中测(互测)",
                                 options=[ft.dropdown.Option("弱测"),
                                          ft.dropdown.Option("中测(互测)"),
-                                         ft.dropdown.Option("强测")]),
+                                         ft.dropdown.Option("强测"),
+                                         ft.dropdown.Option("特测")],
+                                on_change=test_type_change),
                     ft.Dropdown(ref=times,
                                 height=40,
                                 width=80,

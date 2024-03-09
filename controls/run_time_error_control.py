@@ -1,11 +1,14 @@
 import flet as ft
 
+from util.file_util import add_test
+
 
 class RunTimeErrorControl(ft.UserControl):
 
-    def __init__(self, tid, err, inputs, page):
+    def __init__(self, tid, err, inputs, page, sym_str):
         super().__init__()
         self.tid = str(tid)
+        self.input_str = inputs
         self.err = ft.AlertDialog(
             title=ft.Text("Error"),
             content=ft.Text(str(err), selectable=True),
@@ -15,6 +18,10 @@ class RunTimeErrorControl(ft.UserControl):
             content=ft.Text(inputs, selectable=True),
         )
         self.page = page
+        self.sym_str = sym_str
+
+    def add_to_test(self, _):
+        add_test(self.input_str + self.sym_str)
 
     def open_input(self, _):
         self.page.dialog = self.inputs
@@ -39,10 +46,18 @@ class RunTimeErrorControl(ft.UserControl):
                 ft.ElevatedButton("打开输入", on_click=self.open_input),
                 ft.ElevatedButton("打开报错", on_click=self.open_err)],
                 alignment=ft.MainAxisAlignment.CENTER),
-                width=600,
+                width=500,
                 height=40,
                 bgcolor=ft.colors.GREY_200,
                 border=ft.border.all(1, ft.colors.BLACK),
                 border_radius=5,
-                alignment=ft.alignment.center)
+                alignment=ft.alignment.center),
+            ft.Container(height=40,
+                         width=150,
+                         content=ft.ElevatedButton(
+                             content=ft.Text(
+                                 value="加入特测"
+                             ),
+                             on_click=self.add_to_test
+                         ))
         ])

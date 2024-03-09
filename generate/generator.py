@@ -25,7 +25,7 @@ def gen_test(max_length, func_max_length, max_cost, func_max_cost):
     func_name = ['f', 'g', 'h']
     random.shuffle(func_name)
     func_num = random.randint(0, 3)
-    res.append(func_num)
+    res.append(str(func_num))
     for i in range(0, func_num):
         function = gen_func(func_name[i], func_max_length, func_max_cost)
         functions.append(function)
@@ -34,7 +34,8 @@ def gen_test(max_length, func_max_length, max_cost, func_max_cost):
         max_func_cost = max(max_func_cost, cost)
     max_func_cost *= 2
     expr = gen_expr(max_length, max_cost)
-    res.append(expr)
+    res.append(expr.str)
+    res.append(expr.sympy_str)
     return res
 
 

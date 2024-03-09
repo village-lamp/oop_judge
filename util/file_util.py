@@ -1,3 +1,6 @@
+import os.path
+
+
 def read(path):
     file = open(path, "r", encoding="utf-8")
     content = str(file.read())
@@ -16,3 +19,17 @@ def write(path, inputs):
                 file.write("\n")
 
     file.close()
+
+
+def read_list(path):
+    content = read(path)
+    return content.split("\n")
+
+
+def add_test(inputs):
+    inputs = inputs.split("\n")
+    path = "resources\\common\\test"
+    i = 1
+    while os.path.exists(os.path.join(path, f"input{i}.txt")):
+        i += 1
+    write(os.path.join(path, f"input{i}.txt"), inputs)

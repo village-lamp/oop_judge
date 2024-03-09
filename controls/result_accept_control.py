@@ -16,10 +16,18 @@ class ResultAcceptControl(ft.UserControl):
                                  color=ft.colors.GREEN,
                                  size=20,
                                  weight=ft.FontWeight.W_600),
-                         width=600,
+                         width=500,
                          height=40,
                          bgcolor=ft.colors.GREY_200,
                          border=ft.border.all(1, ft.colors.BLACK),
                          border_radius=5,
-                         alignment=ft.alignment.center)
+                         alignment=ft.alignment.center),
+            ft.Container(height=40,
+                         width=150,
+                         content=ft.ElevatedButton(
+                             content=ft.Text(
+                                 value="加入特测"
+                             ),
+                             disabled=True
+                         ))
         ])

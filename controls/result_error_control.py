@@ -1,12 +1,15 @@
 import flet as ft
 
+from util.file_util import add_test
+
 
 class ResultErrorControl(ft.UserControl):
 
-    def __init__(self, tid, inputs, stdout, out, page, value):
+    def __init__(self, tid, inputs, stdout, out, page, value, sym_str):
         super().__init__()
         self.tid = str(tid)
         self.value = value
+        self.input_str = inputs
         self.inputs = ft.AlertDialog(
             title=ft.Text("input{}.txt".format(tid)),
             content=ft.Text(inputs, selectable=True),
@@ -20,6 +23,10 @@ class ResultErrorControl(ft.UserControl):
             content=ft.Text(out, selectable=True),
         )
         self.page = page
+        self.sym_str = sym_str
+
+    def add_to_test(self, _):
+        add_test(self.input_str + self.sym_str)
 
     def open_input(self, _):
         self.page.dialog = self.inputs
@@ -50,10 +57,18 @@ class ResultErrorControl(ft.UserControl):
                 ft.ElevatedButton("打开输出", on_click=self.open_output),
                 ft.ElevatedButton("打开参考输出", on_click=self.open_stdout)],
                 alignment=ft.MainAxisAlignment.CENTER),
-                width=600,
+                width=500,
                 height=40,
                 bgcolor=ft.colors.GREY_200,
                 border=ft.border.all(1, ft.colors.BLACK),
                 border_radius=5,
-                alignment=ft.alignment.center)
+                alignment=ft.alignment.center),
+            ft.Container(height=40,
+                         width=150,
+                         content=ft.ElevatedButton(
+                             content=ft.Text(
+                                 value="加入特测"
+                             ),
+                             on_click=self.add_to_test
+                         ))
         ])
