@@ -33,11 +33,12 @@ def main(page: ft.Page):
             for i in range(1, len(ans_list)):
                 if ans_list[i][0] == "答案正确":
                     out_list.controls.append(ResultAcceptControl(i))
-                if ans_list[i][0] == "答案错误":
+                if ans_list[i][0] == "答案错误" or ans_list[i][0] == "格式错误":
                     out_list.controls.append(
                         ResultErrorControl(i, ans_list[i][3],
                                            ans_list[i][2],
-                                           ans_list[i][1], page))
+                                           ans_list[i][1],
+                                           page, ans_list[i][0]))
                 if ans_list[i][0] == "运行错误":
                     out_list.controls.append(RunTimeErrorControl(i, ans_list[i][1], ans_list[i][2], page))
         page.update()

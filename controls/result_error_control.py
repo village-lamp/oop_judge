@@ -3,9 +3,10 @@ import flet as ft
 
 class ResultErrorControl(ft.UserControl):
 
-    def __init__(self, tid, inputs, stdout, out, page):
+    def __init__(self, tid, inputs, stdout, out, page, value):
         super().__init__()
         self.tid = str(tid)
+        self.value = value
         self.inputs = ft.AlertDialog(
             title=ft.Text("input{}.txt".format(tid)),
             content=ft.Text(inputs, selectable=True),
@@ -41,7 +42,7 @@ class ResultErrorControl(ft.UserControl):
                          content=ft.Text("test{0}:".format(self.tid),
                                          size=20, weight=ft.FontWeight.W_600)),
             ft.Container(ft.Row([
-                ft.Text("答案错误",
+                ft.Text(value=self.value,
                         color=ft.colors.RED,
                         size=20,
                         weight=ft.FontWeight.W_600),

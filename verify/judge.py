@@ -6,7 +6,6 @@ import zipfile
 import sympy
 
 from generate.exprs.expr import Expr
-from generate.generator import gen_null
 from util.file_util import write, read
 from util.java_util import process_java
 
@@ -79,12 +78,12 @@ class Judge:
                 for j in range(0, len(inputs[i]) - 1):
                     inputs_str = str(inputs[i][j]) + '\n'
                 inputs_str += inputs[i][len(inputs[i]) - 1].str
-                ret.append(["运行错误", out, inputs_str])
+                ret.append(["运行错误", out, read(input_path)])
                 continue
             os.system("copy {0} {1}".format(os.path.join(self.target_path, "output.txt"),
                                             output_path))
             ver = self.verify(out, inputs[i][len(inputs[i]) - 1].sympy_str)
-            if ver[0] == "答案错误":
+            if ver[0] == "答案错误" or ver[0] == "格式错误":
                 ver.append(read(input_path))
             ret.append(ver)
 
@@ -96,16 +95,19 @@ class Judge:
         stdout = stdout.replace("^", "**")
         stdout = sympy.expand(stdout)
         if not self.is_legal(out):
-            return ["答案错误", out, stdout]
+            return ["格式错误", str(out).replace("**", "^"),
+                    str(out).replace("**", "^")]
         try:
             v_out = sympy.expand(out)
         except:
             print("exception")
-            return ["答案错误", out, stdout]
+            return ["格式错误", str(out).replace("**", "^"),
+                    str(out).replace("**", "^")]
         if v_out == stdout:
             return ["答案正确"]
         else:
-            return ["答案错误", out, stdout]
+            return ["答案错误", str(out).replace("**", "^"),
+                    str(out).replace("**", "^")]
 
     def is_legal(self, out: str):
         pos = 0
@@ -146,7 +148,6 @@ class Judge:
             return False
 
         return True
-
 
     def get_right_brace(self, strs, left_pos):
         bra = 1
