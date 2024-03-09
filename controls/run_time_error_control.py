@@ -13,6 +13,12 @@ class RunTimeErrorControl(ft.UserControl):
             title=ft.Text("Error"),
             content=ft.Text(str(err), selectable=True),
         )
+        self.button = ft.ElevatedButton(
+                             content=ft.Text(
+                                 value="加入特测"
+                             ),
+                             on_click=self.add_to_test
+                         )
         self.inputs = ft.AlertDialog(
             title=ft.Text("input{}.txt".format(tid)),
             content=ft.Text(inputs, selectable=True),
@@ -22,6 +28,9 @@ class RunTimeErrorControl(ft.UserControl):
 
     def add_to_test(self, _):
         add_test(self.input_str + self.sym_str)
+        self.button.disabled = True
+        self.page.update()
+
 
     def open_input(self, _):
         self.page.dialog = self.inputs
@@ -54,10 +63,5 @@ class RunTimeErrorControl(ft.UserControl):
                 alignment=ft.alignment.center),
             ft.Container(height=40,
                          width=150,
-                         content=ft.ElevatedButton(
-                             content=ft.Text(
-                                 value="加入特测"
-                             ),
-                             on_click=self.add_to_test
-                         ))
+                         content=self.button)
         ])
