@@ -27,8 +27,8 @@ def compile_java(code_path, target_path):
     copy_start()
 
     file_util.write(os.path.join(code_path, "javaList.txt"), file_list)
-    cmd = "javac @{0} -encoding UTF-8 -d {1}".format(os.path.join(code_path, "javaList.txt"),
-                                                     target_path)
+    cmd = "javac @{0} -Xlint:unchecked -encoding UTF-8 -d {1}".format(os.path.join(code_path, "javaList.txt"),
+                                                                      target_path)
     process = subprocess.Popen(cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     process.wait()
     out = process.stdout.read()
