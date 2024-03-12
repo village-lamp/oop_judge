@@ -16,10 +16,12 @@ functions = []
 var_lists = []
 max_func_cost = 0
 is_func = 0
+is_strong = False
 
 
-def gen_test(max_length, func_max_length, max_cost, func_max_cost):
-    global functions, max_func_cost
+def gen_test(max_length, func_max_length, max_cost, func_max_cost, strong):
+    global functions, max_func_cost, is_strong
+    is_strong = strong
     res = []
     max_func_cost = 0
     functions = []
@@ -89,7 +91,9 @@ def gen_null(strs: str, times):
 def gen_expr(max_length, max_cost):
     expr = Expr()
     length = 0
-    while max_length - length > 2 and expr.get_cost() + 2 < max_cost:
+    while max_length - length > 2:
+        if not is_strong and expr.get_cost() + 2 >= max_cost:
+            break
         length += 1
         term = gen_term(max_length - length, max_cost - expr.get_cost())
         length += term.len
@@ -102,7 +106,9 @@ def gen_term(max_length, max_cost):
     term = Term()
     length = 0
     term.is_negative = random.choice([False, True])
-    while max_length - length > 1 and term.get_cost() < max_cost:
+    while max_length - length > 1:
+        if not is_strong and term.get_cost() >= max_cost:
+            break
         length += 1
         factor = gen_factor(max_length - length, int(max_cost / term.get_cost()))
         length += factor.len
@@ -115,6 +121,8 @@ def gen_term(max_length, max_cost):
 
 def gen_factor(max_length, max_cost):
     gens = [gen_var_factor]
+    if is_strong:
+        max_cost = max_func_cost + 100
     if max_length > 2 and max_cost > 1:
         gens.append(gen_con_factor)
     if max_length > 4 and max_cost > 10:
@@ -145,6 +153,8 @@ def gen_exp_factor(max_length, max_cost):
     factor = gen_factor(max_length - length, max_cost - 1)
     length += factor.len
     exp_factor.factor = factor
+    if is_strong:
+        max_cost = exp_factor.get_cost() + 100
     if max_length - length > 2 and exp_factor.get_cost() < max_cost:
         length += 1
         number = gen_index(int(math.log2(max_cost - exp_factor.get_cost())))
@@ -168,6 +178,8 @@ def gen_func_factor(max_length, max_cost):
             func_factor.to_string()
             cost = func_factor.get_cost()
             var_max_cost >>= 1
+            if is_strong:
+                cost = max_cost
         length += factor.len
     func_factor.to_string()
     return func_factor
@@ -178,6 +190,8 @@ def gen_var_factor(max_length, max_cost):
     if is_func > 0:
         var_factor.name = random.choice(var_lists[0:is_func])
     length = 1
+    if is_strong:
+        max_cost = var_factor.get_cost() + 100
     if max_length - length > 2 and var_factor.get_cost() < max_cost:
         length += 1
         number = gen_index(8)
@@ -205,6 +219,8 @@ def gen_expr_factor(max_length, max_cost):
     expr = gen_expr(random.randint(3, max_length - 2), max_cost - 1)
     length += expr.len + 1
     expr_factor.expr = expr
+    if is_strong:
+        max_cost = expr_factor.get_cost() + 100
     if max_length - length > 2 and expr_factor.get_cost() < max_cost:
         length += 1
         number = gen_index(int(math.log(max_cost) / math.log(expr_factor.get_cost())))

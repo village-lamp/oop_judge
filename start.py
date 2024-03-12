@@ -4,7 +4,7 @@ import generate.generator
 from util.file_util import read_list
 from verify.judge import Judge
 
-test_data = [[20, 10, 500, 200], [50, 20, 5000, 2000], [200, 150, 50000, 2000]]
+test_data = [[20, 10, 500, 200, False], [50, 20, 5000, 2000, False], [200, 150, 0, 0, True]]
 
 
 def start(user_name, zip_name, times, test_type):
@@ -14,7 +14,8 @@ def start(user_name, zip_name, times, test_type):
             inputs = generate.generator.gen_test(test_data[test_type][0],
                                                  test_data[test_type][1],
                                                  test_data[test_type][2],
-                                                 test_data[test_type][3])
+                                                 test_data[test_type][3],
+                                                 test_data[test_type][4])
             tests.append(inputs)
     else:
         path = "resources\\common\\test"
