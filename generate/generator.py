@@ -2,6 +2,7 @@ import math
 import random
 
 from generate.exprs.con_factor import ConFactor
+from generate.exprs.deri_factor import DeriFactor
 from generate.exprs.exp_factor import ExpFactor
 from generate.exprs.expr import Expr
 from generate.exprs.expr_factor import ExprFactor
@@ -118,13 +119,24 @@ def gen_factor(max_length, max_cost):
         gens.append(gen_con_factor)
     if max_length > 4 and max_cost > 10:
         gens.append(gen_expr_factor)
-    if max_length > 5 and max_cost > 10:
+    if max_length > 7 and max_cost > 10:
         gens.append(gen_exp_factor)
-    if (max_length > 7 and is_func == 0 and
-            len(functions) > 0 and max_cost > max_func_cost):
+    if max_length > 7 and len(functions) > 0 and max_cost > max_func_cost:
         gens.append(gen_func_factor)
+    if max_length > 6 and max_cost > 10:
+        gens.append(gen_deri_factor)
     factor = random.choice(gens)(max_length, max_cost)
     return factor
+
+
+def gen_deri_factor(max_length, max_cost):
+    deri_factor = DeriFactor()
+    length = 4
+    expr = gen_expr(max_length - length, math.log2(max_cost))
+    length += expr.len
+    deri_factor.expr = expr
+    deri_factor.to_string()
+    return deri_factor
 
 
 def gen_exp_factor(max_length, max_cost):
