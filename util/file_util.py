@@ -28,7 +28,10 @@ def read_list(path):
 
 def add_test(inputs):
     inputs = inputs.split("\n")
-    inputs.remove("")
+    try:
+        inputs.remove("")
+    except:
+        pass
     path = "resources\\common\\test"
     i = 1
     while os.path.exists(os.path.join(path, f"input{i}.txt")):

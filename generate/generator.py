@@ -110,7 +110,7 @@ def gen_term(max_length, max_cost):
         if not is_strong and term.get_cost() >= max_cost:
             break
         length += 1
-        factor = gen_factor(max_length - length, int(max_cost / term.get_cost()))
+        factor = gen_factor(max_length - length, max_cost // term.get_cost())
         length += factor.len
         term.factors.append(factor)
         if random.randint(0, 1) > 0:
@@ -131,7 +131,7 @@ def gen_factor(max_length, max_cost):
         gens.append(gen_exp_factor)
     if max_length > 7 and len(functions) > 0 and max_cost > max_func_cost:
         gens.append(gen_func_factor)
-    if max_length > 6 and max_cost > 10:
+    if max_length > 6 and max_cost > 10 and not is_func:
         gens.append(gen_deri_factor)
     factor = random.choice(gens)(max_length, max_cost)
     return factor
@@ -140,7 +140,7 @@ def gen_factor(max_length, max_cost):
 def gen_deri_factor(max_length, max_cost):
     deri_factor = DeriFactor()
     length = 4
-    expr = gen_expr(max_length - length, math.log2(max_cost))
+    expr = gen_expr(max_length - length, int(math.log2(max_cost)))
     length += expr.len
     deri_factor.expr = expr
     deri_factor.to_string()
