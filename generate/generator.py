@@ -34,8 +34,7 @@ def gen_test(max_length, func_max_length, max_cost, func_max_cost, strong):
         functions.append(function)
         res.append(function.to_string())
         _, cost = function.calc([VarFactor(), VarFactor(), VarFactor()])
-        max_func_cost = max(max_func_cost, cost)
-    max_func_cost *= 2
+        max_func_cost = max(max_func_cost, cost * 2)
     expr = gen_expr(max_length, max_cost)
     res.append(expr.str)
     res.append(expr.sympy_str)
@@ -173,7 +172,7 @@ def gen_func_factor(max_length, max_cost):
         cost = max_cost * 2
         var_max_cost = 500
         while cost > max_cost:
-            factor = gen_factor(random.randint(1, max_length - length - var_num + i + 1), var_max_cost)
+            factor = gen_factor(random.randint(1, max_length - length - 2 * (var_num - i - 1)), var_max_cost)
             func_factor.var_list[i] = factor
             func_factor.to_string()
             cost = func_factor.get_cost()

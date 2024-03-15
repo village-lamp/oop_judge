@@ -4,7 +4,7 @@ import generate.generator
 from util.file_util import read_list
 from verify.judge import Judge
 
-test_data = [[20, 10, 500, 200, False], [50, 20, 5000, 2000, False], [200, 150, 0, 0, True]]
+test_data = [[20, 10, 500, 200, False], [50, 20, 5000, 2000, False], [200, 150, 500000, 20000, False]]
 
 
 def start(user_name, zip_name, times, test_type):
